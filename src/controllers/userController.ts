@@ -74,21 +74,7 @@ export const loginUser = async (req: CustomRequest, res: Response) => {
 };
 
 
-export const updateUserRole = async (req: CustomRequest, res: Response) => {
-    const { userId } = req.params;
-    const { role } = req.body; // role should be one of ['user', 'admin']
 
-    if (req.user?.role === 'admin') {
-        const user = await User.findByIdAndUpdate(userId, { role }, { new: true });
-        if (user) {
-            res.status(200).json({ message: 'Role updated successfully', user });
-        } else {
-            res.status(404).json({ message: 'User not found' });
-        }
-    } else {
-        res.status(403).json({ message: 'No tienes permiso para actualizar roles' });
-    }
-};
 export const forceUpdateUserRole = async (req: CustomRequest, res: Response) => {
     const { userId } = req.params;
     const { role } = req.body; // role should be one of ['user', 'admin']
