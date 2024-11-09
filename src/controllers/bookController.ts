@@ -64,18 +64,6 @@ export const assignPermissions = async (req: CustomRequest, res: Response): Prom
     }
 };
 
-
-export const softDeleteBook = async (req: CustomRequest, res: Response) => {
-    const { bookId } = req.params;
-    if (req.user?.role === 'admin') {
-        await Book.findByIdAndUpdate(bookId, { isActive: false });
-        res.status(200).json({ message: 'Libro inhabilitado' });
-    } else {
-        res.status(403).json({ message: 'No tienes permiso' });
-    }
-};
-
-
 interface AssignPermissionsRequest extends CustomRequest {
     params: {
         userId: string;
@@ -152,5 +140,20 @@ export const updateBook = async (req: CustomRequest, res: Response): Promise<voi
         res.status(200).json({ message: 'Libro actualizado exitosamente', book: updatedBook });
     } catch (error) {
         res.status(500).json({ message: 'Error al actualizar el libro', error });
+    }
+};
+export const softDeleteBook = async (req: CustomRequest, res: Response): Promise<void> => {
+    const { bookId } = req.params;
+
+    // Verifica que el usuario tenga permisos para inhabilitar libros
+    if (req.user?.permissions.includes('disable:book')) {
+        try {
+            await Book.findByIdAndUpdate(bookId, { isActive: false });
+            res.status(200).json({ message: 'Libro inhabilitado' });
+        } catch (error) {
+            res.status(500).json({ message: 'Error al inhabilitar el libro', error });
+        }
+    } else {
+        res.status(403).json({ message: 'No tienes permiso para inhabilitar libros' });
     }
 };

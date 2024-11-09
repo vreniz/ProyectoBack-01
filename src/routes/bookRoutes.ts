@@ -9,7 +9,7 @@ import { updateBook } from '../controllers/bookController';
 const router = express.Router();
 
 router.post('/create', authenticateToken, checkPermissions(['create:book']), createBook);
-router.delete('/:bookId', authenticateToken, authorizeRole(['admin']), softDeleteBook);
+router.delete('/:bookId', authenticateToken, checkPermissions(['disable:book']), softDeleteBook);
 router.get('/search', searchBook);
 router.get('/search/:id', async (req, res) => {
     const { id } = req.params;

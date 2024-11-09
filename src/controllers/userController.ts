@@ -73,15 +73,7 @@ export const loginUser = async (req: CustomRequest, res: Response) => {
     res.status(200).json({ token });
 };
 
-export const softDeleteUser = async (req: CustomRequest, res: Response) => {
-    const { userId } = req.params;
-    if (req.user?.id === userId || req.user?.role === 'admin') {
-        await User.findByIdAndUpdate(userId, { isActive: false });
-        res.status(200).json({ message: 'Usuario inhabilitado' });
-    } else {
-        res.status(403).json({ message: 'No tienes permiso' });
-    }
-};
+
 export const updateUserRole = async (req: CustomRequest, res: Response) => {
     const { userId } = req.params;
     const { role } = req.body; // role should be one of ['user', 'admin']
@@ -199,5 +191,20 @@ export const getUserPermissions = async (req: Request, res: Response) => {
         res.status(200).json({ permissions: user.permissions });
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener los permisos del usuario', error });
+    }
+};
+export const softDeleteUser = async (req: CustomRequest, res: Response): Promise<void> => {
+    const { userId } = req.params;
+
+    // Verifica que el usuario que solicita la acción tenga permisos o sea el mismo usuario
+    if (req.user?.id === userId || req.user?.permissions.includes('disable:user')) {
+        try {
+            await User.findByIdAndUpdate(userId, { isActive: false });
+            res.status(200).json({ message: 'Usuario inhabilitado' });
+        } catch (error) {
+            res.status(500).json({ message: 'Error al inhabilitar el usuario', error });
+        }
+    } else {
+        res.status(403).json({ message: 'No tienes permiso para inhabilitar este usuario' });
     }
 };
